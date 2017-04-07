@@ -15,7 +15,8 @@ import javax.net.ssl.SSLEngineResult.Status;
 
 public class Squareword {
 	private int minConflictsNumber = Integer.MAX_VALUE;
-	private String[][] bestPosition;
+	private String[][] bestPosition = new String[6][6];
+	private String[][] currentPosition = new String[6][6];
 	private static HashSet<String[]> hashZero = new HashSet<>();
 	private static HashSet<String[]> hashOne = new HashSet<>();
 	private static HashSet<String[]> hashTwo = new HashSet<>();
@@ -52,14 +53,30 @@ public class Squareword {
 			{ "a", " ", "b", " ", " ", " " } };
 
 	public Squareword(){
-		String[][] positiion = generatePosition();
-		setBest(positiion, checkConflictNumber(positiion));
+		setCurrentPosition(generatePosition());
 		System.out.println("start:");
-		printPosition(bestPosition);
+		printPosition(currentPosition);
+		checkBest();
+	}
+	
+	public String[][] getCurrentPosition(){
+		return currentPosition;
+	}
+
+	public void setCurrentPosition(String[][] position) {
+		for (int i = 0; i < 6; i++) {
+			currentPosition[i] = position[i];
+		}
+	}
+	
+	public void setBestPosition(String[][] position) {
+		for (int i = 0; i < 6; i++) {
+			bestPosition[i] = position[i];
+		}
 	}
 	
 	public void printPosition(String[][] position) {
-		for (int i=0; i< position.length; i++) {
+		for (int i = 0; i < position.length; i++) {
 			for (int j = 0; j < position.length; j++) {
 				System.out.print(position[j][i] + " ");
 			}
@@ -76,20 +93,24 @@ public class Squareword {
 		return minConflictsNumber;
 	}
 	
-	public void setBest(String[][] position, int conflicts){
+	public void checkBest(){
+		int conflicts = checkConflictNumber(currentPosition);
 		if (conflicts < minConflictsNumber){
-			this.minConflictsNumber = conflicts;
-			this.bestPosition = position;
+			minConflictsNumber = conflicts;
+			setBestPosition(currentPosition);
 			System.out.println("best:");
-			printPosition(this.bestPosition);
-			System.out.println(this.minConflictsNumber);
+			printPosition(bestPosition);
+			System.out.println(minConflictsNumber);
+			System.out.println("current:");
+			printPosition(currentPosition);
+			System.out.println(checkConflictNumber(currentPosition));
 		}
 	}
 
 	public String[][] generatePosition() {
 		Random randomizer = new Random();
-		String[][] newPosition = startPosition;
-		for (String[] row : newPosition) {
+		String[][] position = startPosition;
+		for (String[] row : position) {
 			for (int i = 0; i < row.length; i++) {
 				if (!row[i].equals(" "))
 					continue;
@@ -99,8 +120,7 @@ public class Squareword {
 				row[i] = letters.get(index);
 			}
 		}
-		checkConflictNumber(newPosition);
-		return newPosition;
+		return position;
 	}
 
 	public int checkConflictNumber(String[][] position) {
@@ -132,7 +152,8 @@ public class Squareword {
 		return conflictNum;
 	}
 	
-	public String[] generateNewRow(String[] row, int index){
+	public void generateNewRow(int index){
+		String[] row = currentPosition[index];
 		List<String> newRowList = Arrays.asList(row);
 		List<String> part = new ArrayList<>();
 		switch (index){
@@ -173,7 +194,8 @@ public class Squareword {
 		}
 		Collections.shuffle(part);
 		String[] newRow = newRowList.toArray(new String[newRowList.size()]);
-		return newRow;
+		//return newRow;
+		currentPosition[index] = newRow;
 	}
 	
 	public boolean haveSolution(){
@@ -184,7 +206,8 @@ public class Squareword {
 		return true;
 	}
 	
-	public boolean noMoreShuffle(String[] row, int index){
+	public boolean noMoreShuffle(int index){
+		String[] row = currentPosition[index];
 		HashSet<String[]> hash = hashSets.get(index);
 		hash.add(row);
 		switch (index){

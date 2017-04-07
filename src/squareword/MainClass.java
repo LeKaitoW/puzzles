@@ -5,22 +5,23 @@ public class MainClass {
 	public static void main(String[] args) {
 		Squareword squareword;
 		squareword = new Squareword();
-		String[][] position = squareword.getBestPosition();
 		int i = 0;
-		for (int j = 0; j < 6; j++) {
-			while (!squareword.noMoreShuffle(position[j], j)) {
-				position[j] = squareword.generateNewRow(position[j], j);
-				squareword.setBest(position, squareword.checkConflictNumber(position));
-				i++;
-			}
-			position = squareword.getBestPosition();
+		//while (!squareword.haveSolution()) {
+			for (int j = 0; j < 6; j++) {
+				while (!squareword.noMoreShuffle(j)) {
+					squareword.generateNewRow(j);
+					squareword.checkBest();
+					i++;
+				}
+			//}
 		}
-		position = squareword.getBestPosition();
-		squareword.printPosition(position);
-		System.out.println(squareword.checkConflictNumber(position));
-		System.out.println(squareword.getMin());
+		System.out.println("current = ");
+		squareword.printPosition(squareword.getCurrentPosition());
+		System.out.println("best = ");
 		squareword.printPosition(squareword.getBestPosition());
-		System.out.println(i);
+		System.out.println(squareword.checkConflictNumber(squareword.getBestPosition()));
+		System.out.println("minCon = " + squareword.getMin());
+		System.out.println("iterations = " + i);
 	}
 
 }
