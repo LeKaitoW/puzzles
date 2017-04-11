@@ -4,23 +4,22 @@ public class MainClass {
 
 	public static void main(String[] args) {
 		Squareword squareword;
+		int min = Integer.MAX_VALUE;
 		squareword = new Squareword();
 		int i = 0;
-		//while (!squareword.haveSolution()) {
+		while (!squareword.haveSolution()) {
+			squareword.start();
 			for (int j = 0; j < 6; j++) {
-				while (!squareword.noMoreShuffle(j)) {
-					squareword.generateNewRow(j);
-					squareword.checkBest();
-					i++;
-				}
-			//}
+				//squareword.generateAllRows(j);
+				squareword.solutionWithProbabilty(j);
+			}
+			System.out.println(i);
+			if (squareword.getMin() < min)
+				min = squareword.getMin();
+			i++;
+			System.out.println("glob min " + min);
 		}
-		System.out.println("current = ");
 		squareword.printPosition(squareword.getCurrentPosition());
-		System.out.println("best = ");
-		squareword.printPosition(squareword.getBestPosition());
-		System.out.println(squareword.checkConflictNumber(squareword.getBestPosition()));
-		System.out.println("minCon = " + squareword.getMin());
 		System.out.println("iterations = " + i);
 	}
 

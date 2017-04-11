@@ -17,22 +17,6 @@ public class Squareword {
 	private int minConflictsNumber = Integer.MAX_VALUE;
 	private String[][] bestPosition = new String[6][6];
 	private String[][] currentPosition = new String[6][6];
-	private static HashSet<String[]> hashZero = new HashSet<>();
-	private static HashSet<String[]> hashOne = new HashSet<>();
-	private static HashSet<String[]> hashTwo = new HashSet<>();
-	private static HashSet<String[]> hashThree = new HashSet<>();
-	private static HashSet<String[]> hashFour = new HashSet<>();
-	private static HashSet<String[]> hashFive = new HashSet<>();
-	private static Map<Integer, HashSet<String[]>> hashSets = new HashMap<Integer, HashSet<String[]>>(){{
-		put(0, hashZero);
-		put(1, hashOne);
-		put(2, hashTwo);
-		put(3, hashThree);
-		put(4, hashFour);
-		put(5, hashFive);
-	}
-	};
-	
 	private final static ArrayList<String> letters = new ArrayList<String>() {
 		{
 			add("k");
@@ -44,35 +28,48 @@ public class Squareword {
 		}
 	};
 
+	public final static String[][] check = {
+			{ "k", "b", "u", "a", "r", "o" },
+			{ "o", "a", "k", "r", "b", "u" },
+			{ "b", "r", "o", "u", "a", "k" },
+			{ "u", "o", "r", "b", "k", "a" },	
+			{ "r", "k", "a", "o", "u", "b" },
+			{ "a", "u", "b", "k", "o", "r" }};
+
 	private final static String[][] startPosition = new String[][] {
 			{ "k", " ", " ", " ", " ", " " },
 			{ "o", " ", " ", " ", "b", " " },
 			{ "b", " ", " ", " ", "a", " " },
 			{ "u", " ", "r", " ", "k", " " },
 			{ "r", " ", "a", " ", " ", " " },
-			{ "a", " ", "b", " ", " ", " " } };
+			{ "a", " ", "b", " ", " ", " " }};
 
 	public Squareword(){
-		setCurrentPosition(generatePosition());
-		System.out.println("start:");
-		printPosition(currentPosition);
-		checkBest();
 	}
 	
 	public String[][] getCurrentPosition(){
 		return currentPosition;
 	}
 
-	public void setCurrentPosition(String[][] position) {
+	private void setCurrentPosition(String[][] position) {
 		for (int i = 0; i < 6; i++) {
-			currentPosition[i] = position[i];
+			for (int j = 0; j < 6; j++)
+				currentPosition[i][j] = position[i][j];
 		}
 	}
 	
-	public void setBestPosition(String[][] position) {
+	private void setBestPosition(String[][] position) {
 		for (int i = 0; i < 6; i++) {
-			bestPosition[i] = position[i];
+			for (int j = 0; j < 6; j++)
+				bestPosition[i][j] = position[i][j];
 		}
+	}
+	
+	private void setNewRow(String[] row, int index) {
+		for (int i = 0; i < row.length; i++) {
+			currentPosition[index][i] = row[i];
+		}
+		checkBest(index);
 	}
 	
 	public void printPosition(String[][] position) {
@@ -93,24 +90,18 @@ public class Squareword {
 		return minConflictsNumber;
 	}
 	
-	public void checkBest(){
+	private void checkBest(int index){
 		int conflicts = checkConflictNumber(currentPosition);
-		if (conflicts < minConflictsNumber){
+		if (conflicts <= minConflictsNumber){
 			minConflictsNumber = conflicts;
 			setBestPosition(currentPosition);
-			System.out.println("best:");
-			printPosition(bestPosition);
-			System.out.println(minConflictsNumber);
-			System.out.println("current:");
-			printPosition(currentPosition);
-			System.out.println(checkConflictNumber(currentPosition));
 		}
 	}
 
-	public String[][] generatePosition() {
-		Random randomizer = new Random();
-		String[][] position = startPosition;
-		for (String[] row : position) {
+	private void generatePosition() {
+		Random randomizer = new Random(System.nanoTime());
+		setCurrentPosition(startPosition);
+		for (String[] row : currentPosition) {
 			for (int i = 0; i < row.length; i++) {
 				if (!row[i].equals(" "))
 					continue;
@@ -120,11 +111,10 @@ public class Squareword {
 				row[i] = letters.get(index);
 			}
 		}
-		return position;
 	}
 
-	public int checkConflictNumber(String[][] position) {
-		int conflictNum = 0;
+	private int checkConflictNumber(String[][] position) {
+		int conflictNum = 0;//index;
 		List<String> buf = new ArrayList<String>();
 		for (int i = 0; i < position.length; i++) {
 			buf.clear();
@@ -152,75 +142,162 @@ public class Squareword {
 		return conflictNum;
 	}
 	
-	public void generateNewRow(int index){
-		String[] row = currentPosition[index];
-		List<String> newRowList = Arrays.asList(row);
-		List<String> part = new ArrayList<>();
-		switch (index){
+	private String[] getRow(int index){
+		String[] newRow = new String[6];
+		for (int i=0; i<6; i++){
+			newRow[i] = currentPosition[index][i];
+		}
+		return newRow;
+	}
+	
+	private String[] convertToPart(int index){
+		String[] row = getRow(index);
+		String[] part = null;
+		switch(index){
 		case 0:
-			part = newRowList.subList(1, 6);
+			part = Arrays.copyOfRange(row, 1, 6);
 			break;
 		case 1:
 		case 2:
-			part.add(row[1]);
-			part.add(row[2]);
-			part.add(row[3]);
-			part.add(row[5]);
-			Collections.shuffle(part);
-			row[1] = part.get(0);
-			row[2] = part.get(1);
-			row[3] = part.get(2);
-			row[5] = part.get(3);
+			part = new String[4];
+			part[0] = row[1];
+			part[1] = row[2];
+			part[2] = row[3];
+			part[3] = row[5];
 			break;
 		case 3:
-			part.add(row[1]);
-			part.add(row[3]);
-			part.add(row[5]);
-			row[1] = part.get(0);
-			row[3] = part.get(1);
-			row[5] = part.get(2);
+			part = new String[3];
+			part[0] = row[1];
+			part[1] = row[3];
+			part[2] = row[5];
 			break;
 		case 4:
 		case 5:
-			part.add(row[1]);
-			part.add(row[3]);
-			part.add(row[4]);
-			part.add(row[5]);
-			row[1] = part.get(0);
-			row[3] = part.get(1);
-			row[4] = part.get(2);
-			row[5] = part.get(3);
+			part = new String[4];
+			part[0] = row[1];
+			part[1] = row[3];
+			part[2] = row[4];
+			part[3] = row[5];
 			break;
 		}
-		Collections.shuffle(part);
-		String[] newRow = newRowList.toArray(new String[newRowList.size()]);
-		//return newRow;
-		currentPosition[index] = newRow;
+		return part;
+	}
+
+	private String[] convertToRow(String[] set, int index){
+		String[] row = getRow(index);
+		switch (index) {
+		case 0:
+			for (int i = 0; i < 5; i++)
+				row[i + 1] = set[i];
+			break;
+		case 1:
+		case 2:
+			row[1] = set[0];
+			row[2] = set[1];
+			row[3] = set[2];
+			row[5] = set[3];
+			break;
+		case 3:
+			row[1] = set[0];
+			row[3] = set[1];
+			row[5] = set[2];
+			break;
+		case 4:
+		case 5:
+			row[1] = set[0];
+			row[3] = set[1];
+			row[4] = set[2];
+			row[5] = set[3];
+			break;
+		}
+		return row;
+	}
+
+	public void generateAllRows(int index) {
+		HashSet<String[]> hash = new HashSet<String[]>();
+		permute(Arrays.asList(convertToPart(index)), 0, index, hash);
+		for (String[] row : hash){
+			setNewRow(row, index);
+		}
+		hash.clear();
 	}
 	
-	public boolean haveSolution(){
-		if (minConflictsNumber != 0)
+	public void solutionWithProbabilty(int index){
+		List<Row> rows = new ArrayList<>();
+		permuteWithProbability(Arrays.asList(convertToPart(index)), 0, index, rows);
+		
+		Map<Integer, List<Integer>> rates = new HashMap<>();
+		for (Row row : rows){
+			if (rates.containsKey(row.getRate()))
+				rates.get(row.getRate()).add(rows.indexOf(row));
+			else{
+				List<Integer> indexes = new ArrayList<Integer>();
+				indexes.add(rows.indexOf(row));
+				rates.put(row.getRate(), indexes);
+			}
+		}
+		int randomRate = (int) (Math.log(1/Math.random())/Math.log(2));
+		int delta = Integer.MAX_VALUE;
+		List<Integer> currentRows = new ArrayList<>();
+		for (int rate : rates.keySet()){
+			if (Math.abs(rate - randomRate) < delta){
+				delta = Math.abs(rate - randomRate);
+				currentRows = rates.get(rate);
+			}
+		}
+		Random randomizer = new Random();
+		int randomIndex = randomizer.nextInt(currentRows.size());
+		String[] newRow = rows.get(currentRows.get(randomIndex)).getRow();
+		setNewRow(newRow, index);
+	}
+
+	private void permuteWithProbability(List<String> arr, int k, int index, List<Row> rows) {
+		for (int i = k; i < arr.size(); i++) {
+			java.util.Collections.swap(arr, i, k);
+			permuteWithProbability(arr, k + 1, index, rows);
+			java.util.Collections.swap(arr, k, i);
+		}
+		if (k == arr.size() - 1) {
+			String[] row = convertToRow((String[]) arr.toArray(), index);
+			setNewRow(row, index);
+			rows.add(new Row(checkConflictNumber(currentPosition), row));
+		}
+	}
+
+	private void permute(List<String> arr, int k, int index, HashSet<String[]> hash) {
+		for (int i = k; i < arr.size(); i++) {
+			java.util.Collections.swap(arr, i, k);
+			permute(arr, k + 1, index, hash);
+			java.util.Collections.swap(arr, k, i);
+		}
+		if (k == arr.size() - 1) {
+			hash.add(convertToRow((String[]) arr.toArray(), index));
+		}
+	}
+
+	private boolean check(int index){
+		if (Arrays.equals(currentPosition[index], check[index])){
+				System.out.println("yep! " + index);
+				return true;
+		}
+		return false;
+	}
+
+	public boolean haveSolution() {
+		if (minConflictsNumber > 0) {
+			System.out.println(minConflictsNumber);
 			return false;
+		}
 		System.out.println("Solution:");
 		printPosition(bestPosition);
 		return true;
 	}
 	
-	public boolean noMoreShuffle(int index){
-		String[] row = currentPosition[index];
-		HashSet<String[]> hash = hashSets.get(index);
-		hash.add(row);
-		switch (index){
-		case 0:
-			return hash.size() >= 121;
-		case 1:
-		case 2:
-		case 4:
-		case 5:
-			return hash.size() >= 25;
-		case 3:
-			return hash.size() >= 7;
-		}
-		return false;
+	public void start(){
+		minConflictsNumber = Integer.MAX_VALUE;
+		generatePosition();
+		//System.out.println("new");
+		//printPosition(currentPosition);
+		//checkBest(0);
 	}
 }
