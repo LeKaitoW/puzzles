@@ -2,8 +2,6 @@ package squareword;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -11,13 +9,14 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
-import javax.net.ssl.SSLEngineResult.Status;
-
 public class Squareword {
+	public static long seed = System.nanoTime();
 	private int minConflictsNumber = Integer.MAX_VALUE;
 	private String[][] bestPosition = new String[6][6];
 	private String[][] currentPosition = new String[6][6];
 	private final static ArrayList<String> letters = new ArrayList<String>() {
+		private static final long serialVersionUID = 1L;
+
 		{
 			add("k");
 			add("o");
@@ -45,6 +44,7 @@ public class Squareword {
 			{ "a", " ", "b", " ", " ", " " }};
 
 	public Squareword(){
+		generatePosition();
 	}
 	
 	public String[][] getCurrentPosition(){
@@ -99,7 +99,8 @@ public class Squareword {
 	}
 
 	private void generatePosition() {
-		Random randomizer = new Random(System.nanoTime());
+		//Random randomizer = new Random(System.nanoTime());
+		Random randomizer = new Random(seed);
 		setCurrentPosition(startPosition);
 		for (String[] row : currentPosition) {
 			for (int i = 0; i < row.length; i++) {
@@ -236,7 +237,9 @@ public class Squareword {
 				rates.put(row.getRate(), indexes);
 			}
 		}
-		int randomRate = (int) (Math.log(1/Math.random())/Math.log(2));
+		Random randomizer = new Random(seed);
+		int randomRate = (int) (Math.log(1/randomizer.nextDouble())/Math.log(2));
+		//int randomRate = 0;
 		int delta = Integer.MAX_VALUE;
 		List<Integer> currentRows = new ArrayList<>();
 		for (int rate : rates.keySet()){
@@ -245,7 +248,8 @@ public class Squareword {
 				currentRows = rates.get(rate);
 			}
 		}
-		Random randomizer = new Random();
+		
+		//Random randomizer = new Random();
 		int randomIndex = randomizer.nextInt(currentRows.size());
 		String[] newRow = rows.get(currentRows.get(randomIndex)).getRow();
 		setNewRow(newRow, index);
@@ -275,17 +279,9 @@ public class Squareword {
 		}
 	}
 
-	private boolean check(int index){
-		if (Arrays.equals(currentPosition[index], check[index])){
-				System.out.println("yep! " + index);
-				return true;
-		}
-		return false;
-	}
-
 	public boolean haveSolution() {
 		if (minConflictsNumber > 0) {
-			System.out.println(minConflictsNumber);
+			//System.out.println(minConflictsNumber);
 			return false;
 		}
 		System.out.println("Solution:");

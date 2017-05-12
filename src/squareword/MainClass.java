@@ -8,7 +8,7 @@ public class MainClass {
 		squareword = new Squareword();
 		int i = 0;
 		while (!squareword.haveSolution()) {
-			squareword.start();
+			//squareword.start();
 			for (int j = 0; j < 6; j++) {
 				//squareword.generateAllRows(j);
 				squareword.solutionWithProbabilty(j);
@@ -19,8 +19,8 @@ public class MainClass {
 			i++;
 			System.out.println("glob min " + min);
 		}
-		squareword.printPosition(squareword.getCurrentPosition());
 		System.out.println("iterations = " + i);
+		System.out.println(squareword.seed);
 	}
 
 }
