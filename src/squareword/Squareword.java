@@ -10,7 +10,6 @@ import java.util.Random;
 import java.util.Set;
 
 public class Squareword {
-	public static long seed = System.nanoTime();
 	private int minConflictsNumber = Integer.MAX_VALUE;
 	private String[][] bestPosition = new String[6][6];
 	private String[][] currentPosition = new String[6][6];
@@ -27,27 +26,15 @@ public class Squareword {
 		}
 	};
 
-	public final static String[][] check = {
-			{ "k", "b", "u", "a", "r", "o" },
-			{ "o", "a", "k", "r", "b", "u" },
-			{ "b", "r", "o", "u", "a", "k" },
-			{ "u", "o", "r", "b", "k", "a" },	
-			{ "r", "k", "a", "o", "u", "b" },
-			{ "a", "u", "b", "k", "o", "r" }};
+	private final static String[][] startPosition = new String[][] { { "k", " ", " ", " ", " ", " " },
+			{ "o", " ", " ", " ", "b", " " }, { "b", " ", " ", " ", "a", " " }, { "u", " ", "r", " ", "k", " " },
+			{ "r", " ", "a", " ", " ", " " }, { "a", " ", "b", " ", " ", " " } };
 
-	private final static String[][] startPosition = new String[][] {
-			{ "k", " ", " ", " ", " ", " " },
-			{ "o", " ", " ", " ", "b", " " },
-			{ "b", " ", " ", " ", "a", " " },
-			{ "u", " ", "r", " ", "k", " " },
-			{ "r", " ", "a", " ", " ", " " },
-			{ "a", " ", "b", " ", " ", " " }};
-
-	public Squareword(){
+	public Squareword() {
 		generatePosition();
 	}
-	
-	public String[][] getCurrentPosition(){
+
+	public String[][] getCurrentPosition() {
 		return currentPosition;
 	}
 
@@ -57,21 +44,21 @@ public class Squareword {
 				currentPosition[i][j] = position[i][j];
 		}
 	}
-	
+
 	private void setBestPosition(String[][] position) {
 		for (int i = 0; i < 6; i++) {
 			for (int j = 0; j < 6; j++)
 				bestPosition[i][j] = position[i][j];
 		}
 	}
-	
+
 	private void setNewRow(String[] row, int index) {
 		for (int i = 0; i < row.length; i++) {
 			currentPosition[index][i] = row[i];
 		}
 		checkBest(index);
 	}
-	
+
 	public void printPosition(String[][] position) {
 		for (int i = 0; i < position.length; i++) {
 			for (int j = 0; j < position.length; j++) {
@@ -81,26 +68,25 @@ public class Squareword {
 		}
 		System.out.println();
 	}
-	
-	public String[][] getBestPosition(){
+
+	public String[][] getBestPosition() {
 		return bestPosition;
 	}
-	
-	public int getMin(){
+
+	public int getMin() {
 		return minConflictsNumber;
 	}
-	
-	private void checkBest(int index){
+
+	private void checkBest(int index) {
 		int conflicts = checkConflictNumber(currentPosition);
-		if (conflicts <= minConflictsNumber){
+		if (conflicts <= minConflictsNumber) {
 			minConflictsNumber = conflicts;
 			setBestPosition(currentPosition);
 		}
 	}
 
 	private void generatePosition() {
-		//Random randomizer = new Random(System.nanoTime());
-		Random randomizer = new Random(seed);
+		Random randomizer = new Random(System.nanoTime());
 		setCurrentPosition(startPosition);
 		for (String[] row : currentPosition) {
 			for (int i = 0; i < row.length; i++) {
@@ -115,7 +101,7 @@ public class Squareword {
 	}
 
 	private int checkConflictNumber(String[][] position) {
-		int conflictNum = 0;//index;
+		int conflictNum = 0;
 		List<String> buf = new ArrayList<String>();
 		for (int i = 0; i < position.length; i++) {
 			buf.clear();
@@ -142,19 +128,19 @@ public class Squareword {
 
 		return conflictNum;
 	}
-	
-	private String[] getRow(int index){
+
+	private String[] getRow(int index) {
 		String[] newRow = new String[6];
-		for (int i=0; i<6; i++){
+		for (int i = 0; i < 6; i++) {
 			newRow[i] = currentPosition[index][i];
 		}
 		return newRow;
 	}
-	
-	private String[] convertToPart(int index){
+
+	private String[] convertToPart(int index) {
 		String[] row = getRow(index);
 		String[] part = null;
-		switch(index){
+		switch (index) {
 		case 0:
 			part = Arrays.copyOfRange(row, 1, 6);
 			break;
@@ -184,7 +170,7 @@ public class Squareword {
 		return part;
 	}
 
-	private String[] convertToRow(String[] set, int index){
+	private String[] convertToRow(String[] set, int index) {
 		String[] row = getRow(index);
 		switch (index) {
 		case 0:
@@ -214,42 +200,34 @@ public class Squareword {
 		return row;
 	}
 
-	public void generateAllRows(int index) {
-		HashSet<String[]> hash = new HashSet<String[]>();
-		permute(Arrays.asList(convertToPart(index)), 0, index, hash);
-		for (String[] row : hash){
-			setNewRow(row, index);
-		}
-		hash.clear();
-	}
-	
-	public void solutionWithProbabilty(int index){
+	public void solutionWithProbabilty(int index, boolean isZero) {
 		List<Row> rows = new ArrayList<>();
 		permuteWithProbability(Arrays.asList(convertToPart(index)), 0, index, rows);
-		
+
 		Map<Integer, List<Integer>> rates = new HashMap<>();
-		for (Row row : rows){
+		for (Row row : rows) {
 			if (rates.containsKey(row.getRate()))
 				rates.get(row.getRate()).add(rows.indexOf(row));
-			else{
+			else {
 				List<Integer> indexes = new ArrayList<Integer>();
 				indexes.add(rows.indexOf(row));
 				rates.put(row.getRate(), indexes);
 			}
 		}
-		Random randomizer = new Random(seed);
-		int randomRate = (int) (Math.log(1/randomizer.nextDouble())/Math.log(2));
-		//int randomRate = 0;
+
+		int randomRate = 0;
+		Random randomizer = new Random(System.nanoTime());
+		if (!isZero)
+			randomRate = (int) (Math.log(1 / randomizer.nextDouble()) / Math.log(2));
 		int delta = Integer.MAX_VALUE;
 		List<Integer> currentRows = new ArrayList<>();
-		for (int rate : rates.keySet()){
-			if (Math.abs(rate - randomRate) < delta){
+		for (int rate : rates.keySet()) {
+			if (Math.abs(rate - randomRate) < delta) {
 				delta = Math.abs(rate - randomRate);
 				currentRows = rates.get(rate);
 			}
 		}
-		
-		//Random randomizer = new Random();
+
 		int randomIndex = randomizer.nextInt(currentRows.size());
 		String[] newRow = rows.get(currentRows.get(randomIndex)).getRow();
 		setNewRow(newRow, index);
@@ -268,32 +246,12 @@ public class Squareword {
 		}
 	}
 
-	private void permute(List<String> arr, int k, int index, HashSet<String[]> hash) {
-		for (int i = k; i < arr.size(); i++) {
-			java.util.Collections.swap(arr, i, k);
-			permute(arr, k + 1, index, hash);
-			java.util.Collections.swap(arr, k, i);
-		}
-		if (k == arr.size() - 1) {
-			hash.add(convertToRow((String[]) arr.toArray(), index));
-		}
+	public boolean haveSolution() {
+		return (minConflictsNumber == 0);
 	}
 
-	public boolean haveSolution() {
-		if (minConflictsNumber > 0) {
-			//System.out.println(minConflictsNumber);
-			return false;
-		}
-		System.out.println("Solution:");
-		printPosition(bestPosition);
-		return true;
-	}
-	
-	public void start(){
+	public void start() {
 		minConflictsNumber = Integer.MAX_VALUE;
 		generatePosition();
-		//System.out.println("new");
-		//printPosition(currentPosition);
-		//checkBest(0);
 	}
 }
